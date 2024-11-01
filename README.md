@@ -10,10 +10,17 @@ This accomplishes 2 goals
 This project is designed to be quickly understood and modified for the needs of the user. However there are still improvements to be made.
 - [ ] Improved Error handling
 - [ ] Automated form finding and filling
-- [ ] Multiple site handling
+- [ ] Multiple site handling?
 
 # Example Usage
 
+## Setup
+
+Before you run the program, you should edit the configuration files for your needs. (Located in /configs)
+
+I highly recommend swapping out the passwords.txt file with another password list as Github uploads are size restricted.
+
+## Running
 The program is relatively straight forward to use.
 
 ```bash
