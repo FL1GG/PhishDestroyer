@@ -3,6 +3,9 @@ import os
 import random
 import string
 import argparse
+import requests
+from random_user_agent.user_agent import UserAgent
+
 
 nd = NameDataset() # 730k first names, 980k last names from https://github.com/philipperemy/name-dataset
 
@@ -11,6 +14,7 @@ last_names = list(nd.last_names.keys())
 
 r = random.SystemRandom()
 
+user_agent_rotator = UserAgent()
 
 class Profile:
     def __init__(self):
@@ -124,5 +128,37 @@ if __name__ == "__main__":
         prog="PhishDestroyer",
         description="A program designed to ruin the databases of phishing attacks. It creates plausibly real people and injects them into a phishing site.")
     
-    parser.add_argument('-r', '--request-file', help="The request file to perform the injection with.")
+    parser.add_argument('url', help="the url of the data to submit")
+    parser.add_argument("-d", "--data", help="""the post data to be submitted. data should be submitted with 
+                                                {f} meaning firstname
+                                                {l} meaning lastname
+                                                {u} meaning username
+                                                {e} meaning email
+                                                {p} meaning password
+                                                """)
+    
+    # TODO, request type, headers, cookies, [look at sqlmap options]
+
+    args = parser.parse_args()
+
+    
+    while True:
+        #construct a profile
+        prof = Profile()
+
+        #construct a request
+        user_agent = user_agent_rotator.get_random_user_agent()
+
+        headers = {
+            "User-Agent": user_agent,
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate, br",
+            "X-Forwarded-For": str(r.randint(10,200)) + "." + str(r.randint(0,255))  + "." + str(r.randint(0,255)) + "." + str(r.randint(0,255)) # why not
+        }
+
+        data = args.data.replace("{f}", prof.firstname).replace("{l}", prof.lastname).replace("{u}", prof.userName).replace("{e}", prof.email).replace("{p}", prof.password)
+
+        sess = requests.Session()
+
+        sess.post(args.url, data=data, headers=headers)
 
