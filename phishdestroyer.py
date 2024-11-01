@@ -1,20 +1,50 @@
-from names_dataset import NameDataset
 import os
 import random
 import string
 import argparse
 import requests
 from random_user_agent.user_agent import UserAgent
+import sys
 
-
-nd = NameDataset() # 730k first names, 980k last names from https://github.com/philipperemy/name-dataset
-
-first_names = list(nd.first_names.keys())
-last_names = list(nd.last_names.keys())
-
+# create a trueish random variable
 r = random.SystemRandom()
 
-user_agent_rotator = UserAgent()
+# load everything into memory for increased speed
+password_list = []
+with open("configs/passwords.txt", "r", encoding='latin-1') as f:
+    raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
+    password_list = raw_dat.split('\n')
+
+email_domains = []
+with open("configs/email-domains.txt", "r") as f:
+    raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
+    email_domains = raw_dat.split('\n')
+
+sites = []
+with open("configs/sites.txt", "r") as f:
+    raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
+    sites = raw_dat.split('\n')
+
+first_names = []
+with open("configs/firstnames.txt", "r") as f:
+    raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
+    first_names = raw_dat.split('\n')
+
+last_names = []
+with open("configs/lastnames.txt", "r") as f:
+    raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
+    last_names = raw_dat.split('\n')
+
+
+if(len(first_names) <= 1 or len(last_names) <= 1):
+    from names_dataset import NameDataset
+    nd = NameDataset() # 730k first names, 980k last names from https://github.com/philipperemy/name-dataset
+
+if(len(first_names) <= 1):
+    first_names = list(nd.first_names.keys())
+
+if(len(last_names) <= 1):
+    last_names = list(nd.last_names.keys())
 
 class Profile:
     def __init__(self):
@@ -68,46 +98,15 @@ class Profile:
         return username.replace(" ", "") # some names contain spaces
 
     def getEmail(self):
-        #TODO add fuzzing for .gov, .mil type emails
-        common_endings = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "aol.com", "zoho.com"]
-
-        ending = r.choice(common_endings)
-
+        ending = r.choice(email_domains)
         email = self.userName + "@" + ending
 
         return email
     
 
     def getPassword(self):
-        # three types of passwords currently, Rockyou, 4 word combinations, and true random passwords
-        formats = ["rockyou", "4word", "random"]
-        fmt = r.choice(formats)
-
-        password = ""
-
-        match fmt:
-            case "rockyou":
-                with open("data/10-million-password-list-top-1000000.txt", "r", encoding='latin-1') as f:
-                    raw_dat = f.read()
-                    org_pass = r.choice(raw_dat.split('\n'))
-
-                    password = self.randomize_password(org_pass)
-            case "4word":
-                with open("data/words_alpha.txt", "r", encoding='latin-1') as f:
-                    raw_dat = f.read()
-                    words = raw_dat.split('\n')
-
-                    org_pass = r.choice(words) + r.choice(words) + r.choice(words)
-                    password = self.randomize_password(org_pass)
-
-            case "random":
-                characters = list(string.ascii_lowercase) + list(string.ascii_uppercase) + list(string.digits) + list(string.punctuation)
-                for i in range(r.randint(6,17)):
-                    password += r.choice(characters)
-                
-
-        return password
-
+        return self.randomize_password(r.choice(password_list))
+            
 
     # randomize the case of the password, #TODO substitution or endings such as @, !, etc..
     def randomize_password(self, password):
@@ -140,12 +139,15 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+
+    user_agent_rotator = UserAgent()
     
     while True:
         #construct a profile
         prof = Profile()
 
         #construct a request
+        
         user_agent = user_agent_rotator.get_random_user_agent()
 
         headers = {
