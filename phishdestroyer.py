@@ -2,6 +2,7 @@ from names_dataset import NameDataset
 import os
 import random
 import string
+import argparse
 
 nd = NameDataset() # 730k first names, 980k last names from https://github.com/philipperemy/name-dataset
 
@@ -20,7 +21,7 @@ class Profile:
         self.password = self.getPassword()
 
 
-        # Future work
+        # TODO Future work
         self.address = "" #openaddress potentially
         self.creditcard = "" #https://github.com/wcDogg/python-cc-num-gen/tree/main
 
@@ -82,7 +83,7 @@ class Profile:
 
         match fmt:
             case "rockyou":
-                with open("data/rockyou.txt", "r", encoding='latin-1') as f:
+                with open("data/10-million-password-list-top-1000000.txt", "r", encoding='latin-1') as f:
                     raw_dat = f.read()
                     org_pass = r.choice(raw_dat.split('\n'))
 
@@ -118,11 +119,10 @@ class Profile:
         return new_pass
 
 
-for x in range(10):
-    x = Profile()
-    print(x.firstname)
-    print(x.lastname)
-    print(x.userName)
-    print(x.email)
-    print(x.password)
-    print("")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        prog="PhishDestroyer",
+        description="A program designed to ruin the databases of phishing attacks. It creates plausibly real people and injects them into a phishing site.")
+    
+    parser.add_argument('-r', '--request-file', help="The request file to perform the injection with.")
+
