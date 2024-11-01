@@ -1,13 +1,25 @@
 # Summary
 
-This project is part of Hack-Back. The goal is make data obtained through phishing campaigns unusable. 
+This project is part of the Hack-Back movement. The goal is make data obtained through phishing campaigns unusable. It does this by injecting large amounts of bad data into the phishing forms. 
+
+This accomplishes 2 goals
+* It makes it harder to utilize the data. Bad actors have to comb through collected data and remove accounts.
+* It makes it harder to sell the data. Other criminals are less likely to pay for data that is full of unusable accounts.
+
+# TODO
+This project is designed to be quickly understood and modified for the needs of the user. However there are still improvements to be made.
+[ ] Improved Error handling
+[ ] Automated form finding and filling
+[ ] Multiple site handling
 
 # Example Usage
 
 The program is relatively straight forward to use.
 
 ```bash
-> python phishdestroyer.py --help
+python phishdestroyer.py --help
+```
+```
 usage: PhishDestroyer [-h] [-d DATA] url
 
 A program designed to ruin the databases of phishing attacks. It creates plausibly real people and injects them into a phishing site.
@@ -25,7 +37,7 @@ Assume we came across a phishing site that looks like the following:
 
 ![A Phishing Site Simulating Netflix](media/netflix-phishing-site.png)
 
-We could intercept the traffic and we would see the following request going to `http://127.0.0.1:8080/login.php`
+Intercepting the traffic and we would see the following request going to `http://127.0.0.1:8080/login.php`
 
 ```text
 POST /login.php HTTP/1.1
@@ -54,8 +66,10 @@ email=asdfm&password=asdfasdf&rememberMe=true&flow=websiteSignUp&mode=login&acti
 
 With our program we then attempt to pollute their database:
 
+```bash
+python phishdestroyer.py http://127.0.0.1:8080/login.php -d "email={e}&password={p}"
 ```
-> python phishdestroyer.py http://127.0.0.1:8080/login.php -d "email={e}&password={p}"
+```
 {'email': '병.Elizbar81@yahoo.com', 'password': '*T&}l}pJ['}
 {'email': 'Escarlet.Mkalcha74@yahoo.com', 'password': 'rFx[Zw[f~f13%9'}
 {'email': 'Qingran.PeñaBarcia67@gmail.com', 'password': 'eXPensILATionhyrACOTheREMeTHylOLUreadoLLishlY'}
@@ -71,4 +85,4 @@ With our program we then attempt to pollute their database:
 ...
 ```
 
-On the backend of the phishing server the data has been polluted.
+On the backend of the phishing server the data is polluted.

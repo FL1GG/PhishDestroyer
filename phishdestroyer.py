@@ -97,8 +97,7 @@ class Profile:
                     raw_dat = f.read()
                     words = raw_dat.split('\n')
 
-                    org_pass = r.choice(words) + r.choice(words) + r.choice(words) + r.choice(words)
-
+                    org_pass = r.choice(words) + r.choice(words) + r.choice(words)
                     password = self.randomize_password(org_pass)
 
             case "random":
