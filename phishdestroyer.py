@@ -35,6 +35,10 @@ with open("configs/lastnames.txt", "r") as f:
     raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
     last_names = raw_dat.split('\n')
 
+username_rules = []
+with open("configs/username-rules.txt", "r") as f:
+    raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
+    username_rules = raw_dat.split('\n')
 
 if(len(first_names) <= 1 or len(last_names) <= 1):
     from names_dataset import NameDataset
@@ -69,31 +73,16 @@ class Profile:
     
     
     def getUserName(self):
-
         # create the first section of the email
-        # TODO add more format options, phishers potentially filter out emails using name. May need random words.
-        common_formats = ["{f}{last}", "{first}.{last}", "{first}_{last}", "{first}{last}", "{f}.{last}"] 
+        format = r.choice(username_rules)
 
-        format = r.choice(common_formats)
+        n2 = str(r.randint(0, 100))    
 
-        username = ""
-
-        match format:
-            case "{f}{last}":
-                username += self.firstname[0] + self.lastname
-            case "{first}.{last}":
-                username += self.firstname + "." + self.lastname
-            case "{first}_{last}":
-                username += self.firstname + "_" + self.lastname
-            case "{first}{last}":
-                username += self.firstname + self.lastname
-            case "{f}.{last}":
-                username += self.firstname[0] + "." + self.lastname
-
-
-        # add a number in 30% of cases to increase variation
-        if(r.random() < .3):
-            username += str(r.randint(0, 100)) # adds 2 numbers, #TODO may want to make this a year later (4 nums)
+        username = format.replace("{f}", self.firstname[0]
+                                ).replace("{first}", self.firstname
+                                ).replace("{l}", self.lastname[0]
+                                ).replace("{last}", self.lastname
+                                ).replace("{n2}", n2)
 
         return username.replace(" ", "") # some names contain spaces
 

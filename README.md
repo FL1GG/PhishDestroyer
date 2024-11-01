@@ -11,16 +11,23 @@ This project is designed to be quickly understood and modified for the needs of 
 - [ ] Improved Error handling
 - [ ] Automated form finding and filling
 - [ ] Multiple site handling?
+- [ ] Password rules? Similar to hashcat
 
-# Example Usage
 
-## Setup
+# Setup
 
 Before you run the program, you should edit the configuration files for your needs. (Located in /configs)
 
 I highly recommend swapping out the passwords.txt file with another password list as Github uploads are size restricted.
 
-## Running
+### Username current rules
+* {first} - replace with a first name
+* {f} - replace with the first left of a first name
+* {last} - replace with a last name
+* {l} - replace with the first left of a last name
+* {n2} - replace with a 2 digit number
+
+# Example Usage
 The program is relatively straight forward to use.
 
 ```bash
