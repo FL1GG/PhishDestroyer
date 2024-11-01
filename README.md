@@ -71,19 +71,4 @@ With our program we then attempt to pollute their database:
 ...
 ```
 
-On the backend of the phishing server the data has been polluted
-```
-python phishdestroyer.py http://127.0.0.1:8080/login.php -d "email={e}&password={p}"
-{'email': '병.Elizbar81@yahoo.com', 'password': '*T&}l}pJ['}
-{'email': 'Escarlet.Mkalcha74@yahoo.com', 'password': 'rFx[Zw[f~f13%9'}
-{'email': 'Qingran.PeñaBarcia67@gmail.com', 'password': 'eXPensILATionhyrACOTheREMeTHylOLUreadoLLishlY'}
-{'email': 'Rambousek_Hajjiri9@hotmail.com', 'password': '64327733'}
-{'email': 'UTumundo@yahoo.com', 'password': 'psEudOAmBIdexTrouSLyNonMUnIciPalDEGAMisOcIaList'}
-{'email': 'RomannLudia@aol.com', 'password': 'MOBiL12'}
-{'email': 'Grunskis.Immerkær@hotmail.com', 'password': 'nORM130'}
-{'email': 'ﺩﺭﺩFragakis@gmail.com', 'password': 'cn)a~A9(d<yyF'}
-{'email': 'СлободанKissu@outlook.com', 'password': 'sisTErS'}
-{'email': 'Cbuda.MontañoHurtado@aol.com', 'password': 'T%];iX|j0,-I.*'}
-{'email': 'MSableng@yahoo.com', 'password': '1Z;2Hp_@attB,'}
-{'email': 'Märïą_Kecubung@hotmail.com', 'password': 'O!Hk[%u&'}
-```
+On the backend of the phishing server the data has been polluted.
