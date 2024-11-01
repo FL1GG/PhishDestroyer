@@ -156,9 +156,19 @@ if __name__ == "__main__":
             "X-Forwarded-For": str(r.randint(10,200)) + "." + str(r.randint(0,255))  + "." + str(r.randint(0,255)) + "." + str(r.randint(0,255)) # why not
         }
 
-        data = args.data.replace("{f}", prof.firstname).replace("{l}", prof.lastname).replace("{u}", prof.userName).replace("{e}", prof.email).replace("{p}", prof.password)
+        raw_data = args.data.split("&")
+
+        data = {}
+
+        for rd in raw_data:
+            rd = rd.replace("{f}", prof.firstname).replace("{l}", prof.lastname).replace("{u}", prof.userName).replace("{e}", prof.email).replace("{p}", prof.password)
+
+            data[rd.split("=")[0]] = rd.split("=")[1]
+
+        print(data)
 
         sess = requests.Session()
 
-        sess.post(args.url, data=data, headers=headers)
+        sess.post(args.url, data=data, headers=headers, allow_redirects=False)
+
 
