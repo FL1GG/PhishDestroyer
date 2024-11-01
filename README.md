@@ -8,9 +8,9 @@ This accomplishes 2 goals
 
 # TODO
 This project is designed to be quickly understood and modified for the needs of the user. However there are still improvements to be made.
-[ ] Improved Error handling
-[ ] Automated form finding and filling
-[ ] Multiple site handling
+- [ ] Improved Error handling
+- [ ] Automated form finding and filling
+- [ ] Multiple site handling
 
 # Example Usage
 
