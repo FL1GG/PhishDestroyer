@@ -39,20 +39,21 @@ with open("configs/lastnames.txt", "r") as f:
 username_rules = []
 with open("configs/username-rules.txt", "r") as f:
     for line in f:
-        if(len(line) <= 0 or line.startswith("#")):
+        if(len(line.strip()) <= 0 or line.startswith("#")):
             continue
 
-        username_rules.append(line.rstrip())
+        username_rules.append(line.strip())
 
 password_rules = []
 with open("configs/password-rules.txt", "r") as f:
     for line in f:
-        if(len(line) <= 0 or line.startswith("#")):
+        if(len(line.strip()) <= 0 or line.startswith("#")):
             continue
 
-        password_rules.append(line.rstrip())
+        password_rules.append(line.strip())
 
 #stolen from https://github.com/iphelix/pack/blob/master/rulegen.py
+# added bounds checking
 hashcat_rule = dict()
 
 hashcat_rule[':'] = lambda x: x                                    # Do nothing
