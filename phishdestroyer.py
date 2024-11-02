@@ -1,10 +1,7 @@
-import os
 import random
-import string
 import argparse
 import requests
 from random_user_agent.user_agent import UserAgent
-import sys
 import inspect
 
 # create a trueish random variable
@@ -53,7 +50,7 @@ with open("configs/password-rules.txt", "r") as f:
         password_rules.append(line.strip())
 
 #stolen from https://github.com/iphelix/pack/blob/master/rulegen.py
-# added bounds checking
+# added bounds checking, some of these are getting incomprehensible
 hashcat_rule = dict()
 
 hashcat_rule[':'] = lambda x: x                                    # Do nothing

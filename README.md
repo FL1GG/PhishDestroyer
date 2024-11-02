@@ -11,14 +11,15 @@ This project is designed to be quickly understood and modified for the needs of 
 - [ ] Improved Error handling
 - [ ] Automated form finding and filling
 - [ ] Multiple site handling?
-- [ ] Password rules? Similar to hashcat
-
 
 # Setup
 
 Before you run the program, you should edit the configuration files for your needs. (Located in /configs)
 
+### Password & Password rules
 I highly recommend swapping out the passwords.txt file with another password list as Github uploads are size restricted.
+
+Most of the COMPATIBLE hashcat rules are implemented for use in passwords. See https://hashcat.net/wiki/doku.php?id=rule_based_attack
 
 ### Username current rules
 * {first} - replace with a first name
