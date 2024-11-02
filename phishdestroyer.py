@@ -5,6 +5,7 @@ import argparse
 import requests
 from random_user_agent.user_agent import UserAgent
 import sys
+import inspect
 
 # create a trueish random variable
 r = random.SystemRandom()
@@ -37,8 +38,78 @@ with open("configs/lastnames.txt", "r") as f:
 
 username_rules = []
 with open("configs/username-rules.txt", "r") as f:
-    raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
-    username_rules = raw_dat.split('\n')
+    for line in f:
+        if(len(line) <= 0 or line.startswith("#")):
+            continue
+
+        username_rules.append(line.rstrip())
+
+password_rules = []
+with open("configs/password-rules.txt", "r") as f:
+    for line in f:
+        if(len(line) <= 0 or line.startswith("#")):
+            continue
+
+        password_rules.append(line.rstrip())
+
+#stolen from https://github.com/iphelix/pack/blob/master/rulegen.py
+hashcat_rule = dict()
+
+hashcat_rule[':'] = lambda x: x                                    # Do nothing
+
+# Case rules
+hashcat_rule["l"] = lambda x: x.lower()                            # Lowercase all letters
+hashcat_rule["u"] = lambda x: x.upper()                            # Capitalize all letters
+hashcat_rule["c"] = lambda x: x.capitalize()                       # Capitalize the first letter
+hashcat_rule["C"] = lambda x: x[0].lower() + x[1:].upper()         # Lowercase the first found character, uppercase the rest
+hashcat_rule["t"] = lambda x: x.swapcase()                         # Toggle the case of all characters in word
+hashcat_rule["T"] = lambda x,y: x if int(y) >= len(x) else x[:int(y)] + x[int(y)].swapcase() + x[int(y)+1:]  # Toggle the case of characters at position N
+hashcat_rule["E"] = lambda x: " ".join([i[0].upper()+i[1:] for i in x.split(" ")]) # Upper case the first letter and every letter after a space
+
+# Rotation rules
+hashcat_rule["r"] = lambda x: x[::-1]                              # Reverse the entire word
+hashcat_rule["{"] = lambda x: x[1:]+x[0]                           # Rotate the word left
+hashcat_rule["}"] = lambda x: x[-1]+x[:-1]                         # Rotate the word right
+
+# Duplication rules
+hashcat_rule["d"] = lambda x: x+x                                  # Duplicate entire word
+hashcat_rule["p"] = lambda x,y: x*int(y)                                # Duplicate entire word N times
+hashcat_rule["f"] = lambda x: x+x[::-1]                            # Duplicate word reversed
+hashcat_rule["z"] = lambda x,y: x[0]*int(y)+x                           # Duplicate first character N times
+hashcat_rule["Z"] = lambda x,y: x+x[-1]*int(y)                          # Duplicate last character N times
+hashcat_rule["q"] = lambda x: "".join([i+i for i in x])            # Duplicate every character
+hashcat_rule["y"] = lambda x,y: x[:int(y)]+x                            # Duplicate first N characters
+hashcat_rule["Y"] = lambda x,y: x+x[-int(y):]                           # Duplicate last N characters
+
+# Cutting rules
+hashcat_rule["O"] = lambda x,y,z: x if int(y) >= len(x) else x[:int(y)] + x[int(z)-1:]                 #  Delete M characters, starting at position N 
+hashcat_rule["["] = lambda x: x[1:]                                # Delete first character
+hashcat_rule["]"] = lambda x: x[:-1]                               # Delete last character
+hashcat_rule["D"] = lambda x,y: x if int(y) >= len(x) else x[:int(y)]+x[int(y)+1:]                      # Deletes character at position N
+hashcat_rule["'"] = lambda x,y: x if int(y) >= len(x) else x[:int(y)]                              # Truncate word at position N
+hashcat_rule["x"] = lambda x,y,z: x if int(y) >= len(x) or int(y)+int(z) > len(x) else x[:int(y)]+x[int(y)+z:]                    # Delete M characters, starting at position N #TODO bounds may chance how this rule works
+hashcat_rule["@"] = lambda x,y: x.replace(y,'')                    # Purge all instances of X
+
+# Insertion rules
+hashcat_rule["$"] = lambda x,y: x+y                                # Append character to end
+hashcat_rule["^"] = lambda x,y: y+x                                # Prepend character to front
+hashcat_rule["i"] = lambda x,y,z: x if int(y) >= len(x) else x[:int(y)]+z+x[int(y):]                    # Insert character X at position N
+
+# Replacement rules
+hashcat_rule["o"] = lambda x,y,z: x if int(y) >= len(x) else x[:int(y)]+z+x[int(y)+1:]                  # Overwrite character at position N with X
+hashcat_rule["s"] = lambda x,y,z: x.replace(y,z)                   # Replace all instances of X with Y
+hashcat_rule["L"] = lambda x,y: x if int(y) >= len(x) else x[:int(y)]+chr(ord(x[int(y)])<<1)+x[int(y)+1:]    # Bitwise shift left character @ N
+hashcat_rule["R"] = lambda x,y: x if int(y) >= len(x) else x[:int(y)]+chr(ord(x[int(y)])>>1)+x[int(y)+1:]    # Bitwise shift right character @ N
+hashcat_rule["+"] = lambda x,y: x if int(y) >= len(x) else x[:int(y)]+chr(ord(x[int(y)])+1)+x[int(y)+1:]     # Increment character @ N by 1 ascii value
+hashcat_rule["-"] = lambda x,y: x if int(y) >= len(x) else x[:int(y)]+chr(ord(x[int(y)])-1)+x[int(y)+1:]     # Decrement character @ N by 1 ascii value
+hashcat_rule["."] = lambda x,y: x if int(y) >= len(x) else x[:int(y)]+x[int(y)+1]+x[int(y)+1:]               # Replace character @ N with value at @ N plus 1
+hashcat_rule[","] = lambda x,y: x if int(y) >= len(x) else x[:int(y)]+x[int(y)-1]+x[int(y)+1:]               # Replace character @ N with value at @ N minus 1
+
+# Swappping rules
+hashcat_rule["k"] = lambda x: x[1]+x[0]+x[2:]                      # Swap first two characters
+hashcat_rule["K"] = lambda x: x[:-2]+x[-1]+x[-2]                   # Swap last two characters
+hashcat_rule["*"] = lambda x,y,z: x if int(z) >= len(x) or int(y) >= len(x) else (x[:int(y)]+x[int(z)]+x[int(y)+1:int(z)]+x[int(y)]+x[int(z)+1:] if int(z) > int(y) else x[:int(z)]+x[int(y)]+x[int(z)+1:int(y)]+x[int(z)]+x[int(y)+1:]) # Swap character X with Y
+
 
 if(len(first_names) <= 1 or len(last_names) <= 1):
     from names_dataset import NameDataset
@@ -94,20 +165,32 @@ class Profile:
     
 
     def getPassword(self):
-        return self.randomize_password(r.choice(password_list))
+        return self.apply_password_rule(r.choice(password_list))
             
 
-    # randomize the case of the password, #TODO substitution or endings such as @, !, etc..
-    def randomize_password(self, password):
-        new_pass = ""
-        password = password.upper().lower()
-        for i in password:
-            if(r.random() > .5):
-                new_pass += i.upper()
-            else:
-                new_pass += i
+    # apply password rules from hashcat
+    def apply_password_rule(self, password):
+        rules = r.choice(password_rules)
+        rules = ''.join(rules.split())
 
-        return new_pass
+        index = 0
+        while index < len(rules):
+            rule = rules[index]
+            #get number of parameters
+            params = len(inspect.signature(hashcat_rule[rule]).parameters)
+
+            if(params == 1):
+                password = hashcat_rule[rule](password)
+            elif(params == 2):
+                password = hashcat_rule[rule](password, rules[index+1])
+                index += 1
+            elif(params == 3):
+                password = hashcat_rule[rule](password, rules[index+1], rules[index+2])
+                index += 2
+
+            index += 1
+            
+        return password
 
 
 if __name__ == "__main__":
