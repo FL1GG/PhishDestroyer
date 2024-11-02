@@ -1,6 +1,6 @@
 # Summary
 
-This project is part of the Hack-Back movement. The goal is make data obtained through phishing campaigns unusable. It does this by injecting large amounts of bad data into the phishing forms. 
+This project is part of the Hack-Back movement. The goal is make data obtained through phishing campaigns unusable. It does this by injecting large amounts of bad data into the phishing forms.  
 
 This accomplishes 2 goals
 * It makes it harder to utilize the data. Bad actors have to comb through collected data and remove accounts.
@@ -101,3 +101,8 @@ python phishdestroyer.py http://127.0.0.1:8080/login.php -d "email={e}&password=
 ```
 
 On the backend of the phishing server the data is polluted.
+
+
+# Inspiration
+
+This project was inspired by Entrust's handling of Lockbit.

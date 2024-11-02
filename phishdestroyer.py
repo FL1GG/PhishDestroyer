@@ -3,9 +3,43 @@ import argparse
 import requests
 from random_user_agent.user_agent import UserAgent
 import inspect
+import sys
 
-# create a trueish random variable
+# Print iterations progress
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
+
+header = r"""
+   ___  __   _     __   ___         __                       
+  / _ \/ /  (_)__ / /  / _ \___ ___/ /________  __ _____ ____
+ / ___/ _ \/ (_-</ _ \/ // / -_|_-< __/ __/ _ \/ // / -_) __/
+/_/  /_//_/_/___/_//_/____/\__/___|__/_/  \___/\_, /\__/_/   
+                                              /___/          
+"""
+print(header)
+
+# create a trueish random
 r = random.SystemRandom()
+
+printProgressBar(1, 100, prefix = 'Progress:', suffix = 'Complete, Loading Passwords', length = 50)
 
 # load everything into memory for increased speed
 password_list = []
@@ -13,25 +47,22 @@ with open("configs/passwords.txt", "r", encoding='latin-1') as f:
     raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
     password_list = raw_dat.split('\n')
 
+printProgressBar(1, 100, prefix = 'Progress:', suffix = 'Complete, Loading Email Domains', length = 50)
+
+
 email_domains = []
 with open("configs/email-domains.txt", "r") as f:
     raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
     email_domains = raw_dat.split('\n')
+
+printProgressBar(20, 100, prefix = 'Progress:', suffix = 'Complete, Loading Sites', length = 50)
 
 sites = []
 with open("configs/sites.txt", "r") as f:
     raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
     sites = raw_dat.split('\n')
 
-first_names = []
-with open("configs/firstnames.txt", "r") as f:
-    raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
-    first_names = raw_dat.split('\n')
-
-last_names = []
-with open("configs/lastnames.txt", "r") as f:
-    raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
-    last_names = raw_dat.split('\n')
+printProgressBar(30, 100, prefix = 'Progress:', suffix = 'Complete, Loading Username Rules', length = 50)
 
 username_rules = []
 with open("configs/username-rules.txt", "r") as f:
@@ -40,6 +71,9 @@ with open("configs/username-rules.txt", "r") as f:
             continue
 
         username_rules.append(line.strip())
+
+printProgressBar(40, 100, prefix = 'Progress:', suffix = 'Complete, Loading Password Rules', length = 50)
+
 
 password_rules = []
 with open("configs/password-rules.txt", "r") as f:
@@ -108,6 +142,17 @@ hashcat_rule["k"] = lambda x: x[1]+x[0]+x[2:]                      # Swap first 
 hashcat_rule["K"] = lambda x: x[:-2]+x[-1]+x[-2]                   # Swap last two characters
 hashcat_rule["*"] = lambda x,y,z: x if int(z) >= len(x) or int(y) >= len(x) else (x[:int(y)]+x[int(z)]+x[int(y)+1:int(z)]+x[int(y)]+x[int(z)+1:] if int(z) > int(y) else x[:int(z)]+x[int(y)]+x[int(z)+1:int(y)]+x[int(z)]+x[int(y)+1:]) # Swap character X with Y
 
+printProgressBar(50, 100, prefix = 'Progress:', suffix = 'Complete, Loading First and Last Names', length = 50)
+
+first_names = []
+with open("configs/firstnames.txt", "r") as f:
+    raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
+    first_names = raw_dat.split('\n')
+
+last_names = []
+with open("configs/lastnames.txt", "r") as f:
+    raw_dat = f.read() #this is really dependant that the file isn't larger than memory. #TODO improve this
+    last_names = raw_dat.split('\n')
 
 if(len(first_names) <= 1 or len(last_names) <= 1):
     from names_dataset import NameDataset
@@ -118,6 +163,8 @@ if(len(first_names) <= 1):
 
 if(len(last_names) <= 1):
     last_names = list(nd.last_names.keys())
+
+printProgressBar(100, 100, prefix = 'Progress:', suffix = 'Complete'.ljust(40), length = 50)
 
 class Profile:
     def __init__(self):
@@ -213,33 +260,41 @@ if __name__ == "__main__":
     user_agent_rotator = UserAgent()
     
     while True:
-        #construct a profile
-        prof = Profile()
+        try:
+            #construct a profile
+            prof = Profile()
 
-        #construct a request
-        
-        user_agent = user_agent_rotator.get_random_user_agent()
+            #construct a request
+            
+            user_agent = user_agent_rotator.get_random_user_agent()
 
-        headers = {
-            "User-Agent": user_agent,
-            "Accept-Language": "en-US,en;q=0.5",
-            "Accept-Encoding": "gzip, deflate, br",
-            "X-Forwarded-For": str(r.randint(10,200)) + "." + str(r.randint(0,255))  + "." + str(r.randint(0,255)) + "." + str(r.randint(0,255)) # why not
-        }
+            headers = {
+                "User-Agent": user_agent,
+                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Encoding": "gzip, deflate, br",
+                "X-Forwarded-For": str(r.randint(10,200)) + "." + str(r.randint(0,255))  + "." + str(r.randint(0,255)) + "." + str(r.randint(0,255)) # why not
+            }
 
-        raw_data = args.data.split("&")
+            raw_data = args.data.split("&")
 
-        data = {}
+            data = {}
 
-        for rd in raw_data:
-            rd = rd.replace("{f}", prof.firstname).replace("{l}", prof.lastname).replace("{u}", prof.userName).replace("{e}", prof.email).replace("{p}", prof.password)
+            for rd in raw_data:
+                rd = rd.replace("{f}", prof.firstname).replace("{l}", prof.lastname).replace("{u}", prof.userName).replace("{e}", prof.email).replace("{p}", prof.password)
 
-            data[rd.split("=")[0]] = rd.split("=")[1]
+                data[rd.split("=")[0]] = rd.split("=")[1]
 
-        print(data)
+            print(f'\r' + str(data), end='\r')
 
-        sess = requests.Session()
+            sess = requests.Session()
 
-        sess.post(args.url, data=data, headers=headers, allow_redirects=False)
+            sess.post(args.url, data=data, headers=headers, allow_redirects=False)
+        except KeyboardInterrupt as kb:
+            print("")
+            print("Gracefully exiting...")
+            sys.exit()
+        except Exception as e:
+            print(e)
+
 
 
