@@ -284,7 +284,7 @@ if __name__ == "__main__":
 
                 data[rd.split("=")[0]] = rd.split("=")[1]
 
-            print(f'\r' + str(data), end='\r')
+            print(f'\r' + str(data) + "".ljust(40), end='\r')
 
             sess = requests.Session()
 
